@@ -201,6 +201,7 @@ const AddCourse = () => {
                       <Picker.Item label="3 Units" value="3" />
                       <Picker.Item label="4 Units" value="4" />
                       <Picker.Item label="5 Units" value="5" />
+                      <Picker.Item label="6 Units" value="6" />
                     </Picker>
                   </View>
                 </View>
@@ -221,6 +222,7 @@ const AddCourse = () => {
                 <Picker.Item label="3 Units" value="3" />
                 <Picker.Item label="4 Units" value="4" />
                 <Picker.Item label="5 Units" value="5" />
+                <Picker.Item label="6 Units" value="6" />
               </Picker>
             </View>
           )}

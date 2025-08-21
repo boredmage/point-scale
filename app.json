@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qudusayo.point-scale"
+      "bundleIdentifier": "com.qudusayo.point-scale",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,7 @@
       },
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.qudusayo.pointscale",
-      "versionCode": 4
+      "versionCode": 6
     },
     "web": {
       "bundler": "metro",

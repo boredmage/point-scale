@@ -8,11 +8,12 @@ const PageHeader = ({
   title,
   description,
   showBackButton = true,
+  actionButton,
 }: {
   title: string;
   description: string;
-
   showBackButton?: boolean;
+  actionButton?: React.ReactNode;
 }) => {
   const navigate = useNavigation();
 
@@ -29,7 +30,7 @@ const PageHeader = ({
           </Pressable>
         </View>
       ) : null}
-      <View>
+      <View className="flex-grow">
         <Text
           className={cn(
             'text-2xl font-normal uppercase text-primary',
@@ -47,7 +48,11 @@ const PageHeader = ({
           {description}
         </Text>
       </View>
-      <View className="flex-1"></View>
+      {actionButton ? (
+        <View className="flex-1 items-end">{actionButton}</View>
+      ) : (
+        <View className="flex-1"></View>
+      )}
     </View>
   );
 };
