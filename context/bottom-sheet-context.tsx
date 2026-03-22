@@ -6,11 +6,11 @@ type bottomSheetTypes = 'result' | 'courseOrder' | 'gradeSettings';
 interface BottomSheetContextType {
   activeResultId: string | undefined;
   setActiveResultId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  bottomSheetRef: React.RefObject<BottomSheet>;
+  bottomSheetRef: React.RefObject<BottomSheet | null>;
   open: (type: bottomSheetTypes) => void;
   close: (type: bottomSheetTypes) => void;
-  courseOrderBottomSheetRef: React.RefObject<BottomSheet>;
-  gradeSettingsBottomSheetRef: React.RefObject<BottomSheet>;
+  courseOrderBottomSheetRef: React.RefObject<BottomSheet | null>;
+  gradeSettingsBottomSheetRef: React.RefObject<BottomSheet | null>;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextType | null>(null);
@@ -23,7 +23,7 @@ export const BottomSheetProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
+    // console.log('handleSheetChanges', index);
   }, []);
 
   const open = (type: bottomSheetTypes) => {

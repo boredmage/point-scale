@@ -1,6 +1,7 @@
 import { getGrade } from '@/constants/utils';
 import { useBottomSheetContext } from '@/context/bottom-sheet-context';
 import { useCourseStore } from '@/store/courses-store';
+import { useUserStore } from '@/store/user-store';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import React from 'react';
 import { View } from 'react-native';
@@ -10,6 +11,7 @@ import Text from '../text';
 const ResultBottomSheet = () => {
   const { bottomSheetRef, activeResultId } = useBottomSheetContext();
   const course = useCourseStore((store) => store.getResultById(activeResultId));
+  const { gradeScale } = useUserStore();
 
   return (
     <BottomSheet
@@ -37,7 +39,7 @@ const ResultBottomSheet = () => {
           <Text className="text-4xl">{course?.result}%</Text>
         </View>
         <View className="absolute -right-10 top-0 -z-10">
-          <GetGradeIcon grade={getGrade(course?.result || 0)} width={200} height={200} />
+          <GetGradeIcon grade={getGrade(course?.result || 0, gradeScale)} width={200} height={200} />
         </View>
       </BottomSheetView>
     </BottomSheet>

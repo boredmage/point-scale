@@ -48,6 +48,18 @@
             "node_modules/@expo-google-fonts/atkinson-hyperlegible/AtkinsonHyperlegible_700Bold.ttf"
           ]
         }
+      ],
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "27.1.12297006",
+            "useLegacyPackaging": false,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35
+          }
+        }
       ]
     ],
     "experiments": {

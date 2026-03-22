@@ -4,6 +4,7 @@ import Text from '@/components/text';
 import { calculateCGPA } from '@/constants/utils';
 import { useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
+import { useUserStore } from '@/store/user-store';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -17,9 +18,10 @@ export default function HomeScreen() {
   const [totalUnits, setTotalUnits] = useState(0);
   const [unitsPassed, setUnitsPassed] = useState(0);
   const { semesters, activeSemesterId, setActiveSemesterId } = useSemesterStore((store) => store);
+  const { gradeScale } = useUserStore();
 
   const calculateTotalCGPA = () => {
-    const cgpa = calculateCGPA(courses);
+    const cgpa = calculateCGPA(courses, gradeScale);
     setTotalUnits(cgpa[0] || 0);
     setUnitsPassed(cgpa[1] || 0);
     setTotalWGPA(cgpa[2] || 0);
@@ -27,7 +29,6 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    console.log('COMPONENT MOUNTED');
     calculateTotalCGPA();
     setTimeout(() => {
       SplashScreen.hideAsync();
@@ -36,7 +37,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     calculateTotalCGPA();
-  }, [activeSemesterId, default_list]);
+  }, [activeSemesterId, default_list, gradeScale]);
 
   return (
     <View className="flex-1">

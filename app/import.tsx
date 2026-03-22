@@ -7,7 +7,8 @@ import { useSemesterStore } from '@/store/semester-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
-import { SafeAreaView, View } from 'react-native';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ResultType {
   id: string;
@@ -27,7 +28,7 @@ const Import = () => {
   const clearStorage = async () => {
     try {
       await AsyncStorage.clear();
-      console.log('AsyncStorage cleared!');
+      // console.log('AsyncStorage cleared!');
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
     }

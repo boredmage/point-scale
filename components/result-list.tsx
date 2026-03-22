@@ -3,6 +3,7 @@ import { useBottomSheetContext } from '@/context/bottom-sheet-context';
 import { cn } from '@/lib/utils';
 import { CourseType, useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
+import { useUserStore } from '@/store/user-store';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import { Link } from 'expo-router';
@@ -26,8 +27,8 @@ function RightAction({ semesterId, courseId, onPress }: ActionProps) {
     <View className="h-full w-2/5 flex-row">
       <Link
         href={{
-          pathname: `/manage-course/${semesterId}`,
-          params: { 'course-id': courseId },
+          pathname: '/manage-course/[semester-id]',
+          params: { 'semester-id': semesterId, 'course-id': courseId },
         }}
         asChild
       >
@@ -56,13 +57,14 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
   const semester = useSemesterStore((store) => store.semesters);
   const semesterDetails = semester.find((semester) => semester.id === activeSemesterId);
   const openSwipeableRef = useRef<SwipeableMethods | null>(null);
+  const { gradeScale } = useUserStore();
 
   const semesterName = semesterDetails
     ? `${semesterDetails.session} ${semesterDetails.semester}`
     : '';
 
   useEffect(() => {
-    const result = calculateCGPA(results);
+    const result = calculateCGPA(results, gradeScale);
     setCgpa(result[3] || 0);
   }, [results]);
 
@@ -155,7 +157,7 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
               </Text>
             </View>
           </View>
-          <GetGradeIcon grade={getGrade(result || 0)} />
+          <GetGradeIcon grade={getGrade(result || 0, gradeScale)} />
         </Pressable>
       </ReanimatedSwipeable>
     );
@@ -175,7 +177,7 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
               <Text className="text-[#606067]">Current CGPA: {cgpa}</Text>
             </View>
           </View>
-          <Link href={'/manage-course/' + activeSemesterId} asChild>
+          <Link href={{ pathname: '/manage-course/[semester-id]', params: { 'semester-id': activeSemesterId! } }} asChild>
             <Pressable
               hitSlop={8}
               className="flex-row items-center gap-2 rounded-lg bg-primary px-4 py-2"

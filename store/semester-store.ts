@@ -39,7 +39,7 @@ export const useSemesterStore = create(
       addSemester: (data: Omit<SemesterType, 'id'>) => {
         const id = nanoid();
         const { activeSemesterId } = get();
-        console.log({ activeSemesterId: activeSemesterId || id });
+        // console.log({ activeSemesterId: activeSemesterId || id });
         set((state) => {
           const semester = {
             ...data,
