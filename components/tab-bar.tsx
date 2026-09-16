@@ -1,3 +1,4 @@
+import { hapticTap } from '@/lib/haptics';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import React, { useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
@@ -126,6 +127,7 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
             });
 
             if (!isFocused && !event.defaultPrevented) {
+              hapticTap();
               navigation.navigate(route.name, route.params);
             }
           };

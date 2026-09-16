@@ -1,11 +1,10 @@
-import CourseActionsBottomSheet from '@/components/bottom-sheets/course-actions-bottom-sheet';
 import CourseOrderBottomSheet from '@/components/bottom-sheets/course-order-bottom-sheet';
 import ResultBottomSheet from '@/components/bottom-sheets/result-bottom-sheet-display';
 import { HapticTab } from '@/components/HapticTab';
 import TabBar from '@/components/tab-bar';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useUserStore } from '@/store/user-store';
+import { useUserStore, useUserStoreHydrated } from '@/store/user-store';
 import { Redirect, Tabs } from 'expo-router';
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import React from 'react';
@@ -53,6 +52,13 @@ function AndroidTabs() {
 
 export default function TabLayout() {
   const hasFinishedOnboarding = useUserStore((state) => state.hasFinishedOnboarding);
+  const hydrated = useUserStoreHydrated();
+
+  // Keep the splash screen up until the persisted flag is known; otherwise the
+  // default `false` would bounce every cold start through onboarding.
+  if (!hydrated) {
+    return null;
+  }
 
   if (!hasFinishedOnboarding) {
     return <Redirect href="/onboarding" />;
@@ -63,7 +69,6 @@ export default function TabLayout() {
       {Platform.OS === 'ios' ? <IOSTabs /> : <AndroidTabs />}
       <ResultBottomSheet />
       <CourseOrderBottomSheet />
-      <CourseActionsBottomSheet />
     </>
   );
 }

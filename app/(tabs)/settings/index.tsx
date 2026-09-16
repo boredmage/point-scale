@@ -90,11 +90,8 @@ const NavRow = ({ href, ...props }: NavRowProps) => (
   </Link>
 );
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <View className="gap-2.5">
-    <Text className="pl-1 text-xs font-medium uppercase tracking-widest text-faint">{title}</Text>
-    <View className="overflow-hidden rounded-[18px] bg-white">{children}</View>
-  </View>
+const Section = ({ children }: { children: React.ReactNode }) => (
+  <View className="overflow-hidden rounded-[18px] bg-white">{children}</View>
 );
 
 const Settings = () => {
@@ -125,7 +122,7 @@ const Settings = () => {
         <Text className="text-sm text-muted">Manage your app settings</Text>
       </View>
 
-      <Section title="Academic">
+      <Section>
         <NavRow
           title="Semesters"
           description="Manage your semesters"
@@ -147,7 +144,7 @@ const Settings = () => {
         />
       </Section>
 
-      <Section title="More">
+      <Section>
         <Row
           title="Download results"
           description="Download and share your results"

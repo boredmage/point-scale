@@ -1,3 +1,4 @@
+import { hapticSelect } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { SemesterType } from '@/store/semester-store';
 import { AntDesign } from '@expo/vector-icons';
@@ -51,6 +52,7 @@ const SessionTabs = ({ semesters, activeSemesterId, setActiveSemesterId }: Sessi
       renderItem={({ item: semester }) => (
         <Selector
           onPress={() => {
+            if (semester.id !== activeSemesterId) hapticSelect();
             setActiveSemesterId(semester.id);
           }}
           session={semester.session}

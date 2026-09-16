@@ -1,142 +1,191 @@
-import { Trash } from '@/components/icons';
+import { Point, Trash } from '@/components/icons';
 import PageHeader from '@/components/page-header';
 import Text from '@/components/text';
+import { hapticNotify, hapticSelect } from '@/lib/haptics';
+import { toast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 import { useCourseStore } from '@/store/courses-store';
 import { SemesterType, useSemesterStore } from '@/store/semester-store';
 import Checkbox from 'expo-checkbox';
-import React, { useState } from 'react';
-import { Alert, FlatList, Pressable, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-interface SemesterProps extends React.ComponentProps<typeof Pressable> {
-  semester: SemesterType;
-  isSelected: boolean;
-  onToggleSelection: (id: string) => void;
-}
+import React, { useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const Semester = ({ semester, isSelected, onToggleSelection }: SemesterProps) => {
-  return (
-    <Pressable
-      onPress={() => onToggleSelection(semester.id)}
-      className="flex-row items-center justify-between py-4 text-lg font-bold text-gray-800"
-    >
-      <View className="w-full flex-row-reverse items-center justify-between">
-        <Checkbox
-          style={{
-            borderWidth: isSelected ? 4 : 1.5,
-            borderColor: '#5271FF',
-            width: 24,
-            height: 24,
-          }}
-          value={isSelected}
-          onValueChange={() => onToggleSelection(semester.id)}
-          color={isSelected ? '#5271FF' : '#5271FF'}
-        />
-        <View>
-          <Text className="text-xl">
-            {semester.session} {semester.semester}
-          </Text>
-        </View>
+const SemesterRow = ({
+  semester,
+  courseCount,
+  isSelected,
+  isLast,
+  onToggle,
+}: {
+  semester: SemesterType;
+  courseCount: number;
+  isSelected: boolean;
+  isLast: boolean;
+  onToggle: (id: string) => void;
+}) => (
+  <Pressable
+    onPress={() => onToggle(semester.id)}
+    accessibilityRole="checkbox"
+    accessibilityState={{ checked: isSelected }}
+    className={cn('active:bg-surface', isSelected && 'bg-primary-soft/60')}
+  >
+    <View className="min-h-16 flex-row items-center gap-3.5 px-4 py-3.5">
+      <Checkbox
+        value={isSelected}
+        onValueChange={() => onToggle(semester.id)}
+        color={isSelected ? '#5271FF' : undefined}
+        style={{ width: 22, height: 22, borderRadius: 6, borderColor: '#C4C6D4' }}
+      />
+      <View className="flex-1 gap-0.5">
+        <Text className="text-base text-ink">
+          {semester.session} {semester.semester}
+        </Text>
+        <Text className="text-[13px] text-muted">
+          {courseCount} course{courseCount === 1 ? '' : 's'}
+        </Text>
       </View>
-    </Pressable>
-  );
-};
+    </View>
+    {!isLast ? <View className="ml-[58px] h-px bg-[#EEEFF5]" /> : null}
+  </Pressable>
+);
 
 const ManageSemesters = () => {
   const { semesters, removeSemester } = useSemesterStore((state) => state);
+  const courses = useCourseStore((state) => state.courses);
   const removeCoursesBySessionId = useCourseStore((state) => state.removeCoursesBySessionId);
-  const [selectedSemesters, setSelectedSemesters] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const insets = useSafeAreaInsets();
+
+  const courseCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const course of courses) {
+      counts[course.session_id] = (counts[course.session_id] ?? 0) + 1;
+    }
+    return counts;
+  }, [courses]);
+
+  const allSelected = semesters.length > 0 && selected.size === semesters.length;
 
   const toggleSelection = (id: string) => {
-    const newSelection = new Set(selectedSemesters);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
-    }
-    setSelectedSemesters(newSelection);
+    hapticSelect();
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    hapticSelect();
+    setSelected(allSelected ? new Set() : new Set(semesters.map((semester) => semester.id)));
   };
 
   const handleBulkDelete = () => {
-    const selectedIds = Array.from(selectedSemesters);
-    const selectedSemesterNames = selectedIds
-      .map((id) => {
-        const semester = semesters.find((s) => s.id === id);
-        return `${semester?.session} ${semester?.semester}`;
-      })
-      .join(', ');
-
-    const plural = selectedIds.length > 1 ? 's' : '';
-    const semester = selectedIds.length > 1 ? 'these semesters' : 'this semester';
+    const ids = Array.from(selected);
+    const plural = ids.length > 1;
+    hapticNotify('warning');
 
     Alert.alert(
-      `Are you sure you want to delete ${semester}?`,
-      `This will remove ${selectedIds.length} semester${plural} and all courses under them.`,
+      `Delete ${plural ? `${ids.length} semesters` : 'this semester'}?`,
+      `This will remove ${plural ? 'these semesters' : 'the semester'} and every course under ${plural ? 'them' : 'it'}. It cannot be undone.`,
       [
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Cancel',
-          // style: 'cancel',
-        },
-        {
-          text: 'Yes',
+          text: 'Delete',
+          style: 'destructive',
           onPress: () => {
-            selectedIds.forEach((id) => {
+            ids.forEach((id) => {
               removeCoursesBySessionId(id);
               removeSemester(id);
             });
-            setSelectedSemesters(new Set());
+            setSelected(new Set());
+            toast(
+              plural ? 'Semesters Deleted' : 'Semester Deleted',
+              `${ids.length} semester${plural ? 's' : ''} removed`,
+            );
           },
-          style: 'destructive',
         },
       ],
     );
   };
 
   const DeleteButton = () => (
-    <View className="relative">
+    <View>
       <Pressable
         onPress={handleBulkDelete}
-        disabled={selectedSemesters.size === 0}
-        className={`rounded-xl p-2 ${
-          selectedSemesters.size === 0 ? 'bg-gray-300' : 'bg-[#d50000a8]'
-        }`}
+        disabled={selected.size === 0}
+        accessibilityLabel="Delete selected semesters"
+        className={cn(
+          'h-10 w-10 items-center justify-center rounded-lg',
+          selected.size === 0 ? 'border border-line bg-white' : 'bg-[#DC3545]',
+        )}
       >
-        <Trash stroke="#fff" />
+        <Trash stroke={selected.size === 0 ? '#C4C6D4' : '#fff'} width={20} height={20} />
       </Pressable>
-      {selectedSemesters.size > 0 && (
-        <View className="absolute -right-2 -top-2 h-6 w-6 items-center justify-center rounded-full bg-[#5271FF]">
-          <Text className="text-xs font-bold text-white">{selectedSemesters.size}</Text>
+      {selected.size > 0 ? (
+        <View className="absolute -right-1.5 -top-1.5 h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1">
+          <Text className="text-[11px] font-medium text-white">{selected.size}</Text>
         </View>
-      )}
+      ) : null}
     </View>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
       <PageHeader
-        title="Manage Semesters"
-        description="Take control of your semesters."
+        title="Semesters"
+        description="Select semesters to remove them"
         actionButton={<DeleteButton />}
       />
-      <FlatList
-        data={semesters}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Semester
-            semester={item}
-            isSelected={selectedSemesters.has(item.id)}
-            onToggleSelection={toggleSelection}
-          />
-        )}
-        ListEmptyComponent={
-          <View className="mt-8 items-center justify-center">
-            <Text className="text-lg text-gray-500">No semesters found</Text>
+      <ScrollView contentContainerClassName="px-5 pb-10 pt-6" showsVerticalScrollIndicator={false}>
+        {semesters.length ? (
+          <>
+            <View className="mb-2.5 flex-row items-center justify-between px-1">
+              <View className="flex-row items-center">
+                <Text className="text-[13px] text-muted">
+                  {semesters.length} semester{semesters.length === 1 ? '' : 's'}
+                </Text>
+                {selected.size > 0 ? (
+                  <>
+                    <Point width={10} height={10} fill="#C4C6D4" style={{ marginHorizontal: 6 }} />
+                    <Text className="text-[13px] text-muted">{selected.size} selected</Text>
+                  </>
+                ) : null}
+              </View>
+              <Pressable onPress={toggleSelectAll} hitSlop={8}>
+                <Text className="text-sm font-medium text-primary">
+                  {allSelected ? 'Clear selection' : 'Select all'}
+                </Text>
+              </Pressable>
+            </View>
+            <View className="overflow-hidden rounded-2xl bg-white">
+              {semesters.map((semester, index) => (
+                <SemesterRow
+                  key={semester.id}
+                  semester={semester}
+                  courseCount={courseCounts[semester.id] ?? 0}
+                  isSelected={selected.has(semester.id)}
+                  isLast={index === semesters.length - 1}
+                  onToggle={toggleSelection}
+                />
+              ))}
+            </View>
+          </>
+        ) : (
+          <View className="mt-10 items-center gap-1">
+            <Text className="text-center text-xl text-ink">No semesters yet</Text>
+            <Text className="text-center text-sm text-muted">
+              Add one from the Home screen to see it here
+            </Text>
           </View>
-        }
-        ItemSeparatorComponent={() => <View className="h-[1px] bg-gray-200" />}
-        contentContainerClassName="py-4 w-11/12 mx-auto flex-1"
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

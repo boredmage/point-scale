@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
 import { useNavigation } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { ArrowNarrowLeft } from './icons';
+import Text from './text';
 
 const PageHeader = ({
   title,
@@ -15,44 +15,30 @@ const PageHeader = ({
   showBackButton?: boolean;
   actionButton?: React.ReactNode;
 }) => {
-  const navigate = useNavigation();
-
-  const handleGoBack = () => {
-    navigate.goBack();
-  };
+  const navigation = useNavigation();
 
   return (
-    <View className="mx-auto w-11/12 flex-row pt-4">
+    <View className="flex-row items-center gap-3 px-5 pt-3">
       {showBackButton ? (
-        <View className="flex-1">
-          <Pressable onPress={handleGoBack} className="-left-2">
-            <ArrowNarrowLeft width={40} height={40} stroke="#5271FF" strokeWidth={1.5} />
-          </Pressable>
-        </View>
-      ) : null}
-      <View className="flex-grow">
-        <Text
-          className={cn(
-            'text-2xl font-normal uppercase text-primary',
-            showBackButton ? 'text-center' : 'text-left',
-          )}
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          className="h-10 w-10 items-center justify-center rounded-lg border border-line bg-white active:bg-surface"
         >
+          <ArrowNarrowLeft width={24} height={24} stroke="#15172B" strokeWidth={1.75} />
+        </Pressable>
+      ) : null}
+      <View className="flex-1 gap-0.5">
+        <Text className="text-2xl font-medium text-ink" numberOfLines={1}>
           {title}
         </Text>
-        <Text
-          className={cn(
-            'text-sm font-normal text-gray-700',
-            showBackButton ? 'text-center' : 'text-left',
-          )}
-        >
+        <Text className="text-sm text-muted" numberOfLines={1}>
           {description}
         </Text>
       </View>
-      {actionButton ? (
-        <View className="flex-1 items-end">{actionButton}</View>
-      ) : (
-        <View className="flex-1"></View>
-      )}
+      {actionButton ? <View>{actionButton}</View> : null}
     </View>
   );
 };

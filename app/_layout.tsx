@@ -11,6 +11,7 @@ configureReanimatedLogger({
   strict: true,
 });
 
+import AppToast from '@/components/app-toast';
 import GradeSettingsBottomSheet from '@/components/bottom-sheets/grade-settings-bottom-sheet';
 import { BottomSheetProvider } from '@/context/bottom-sheet-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -77,6 +78,7 @@ export default function RootLayout() {
         <StatusBar style="auto" />
         {/* </ThemeProvider> */}
         <GradeSettingsBottomSheet />
+        <AppToast />
       </GestureHandlerRootView>
     </BottomSheetProvider>
   );

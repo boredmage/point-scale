@@ -2,7 +2,7 @@
 import BottomSheet from '@gorhom/bottom-sheet';
 import React, { createContext, useCallback, useRef, useState } from 'react';
 
-type bottomSheetTypes = 'result' | 'courseOrder' | 'gradeSettings' | 'courseActions';
+type bottomSheetTypes = 'result' | 'courseOrder' | 'gradeSettings';
 interface BottomSheetContextType {
   activeResultId: string | undefined;
   setActiveResultId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -11,7 +11,6 @@ interface BottomSheetContextType {
   close: (type: bottomSheetTypes) => void;
   courseOrderBottomSheetRef: React.RefObject<BottomSheet | null>;
   gradeSettingsBottomSheetRef: React.RefObject<BottomSheet | null>;
-  courseActionsBottomSheetRef: React.RefObject<BottomSheet | null>;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextType | null>(null);
@@ -20,7 +19,6 @@ export const BottomSheetProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const bottomSheetRef = useRef<BottomSheet>(null);
   const courseOrderBottomSheetRef = useRef<BottomSheet>(null);
   const gradeSettingsBottomSheetRef = useRef<BottomSheet>(null);
-  const courseActionsBottomSheetRef = useRef<BottomSheet>(null);
   const [activeResultId, setActiveResultId] = useState<string | undefined>(undefined);
 
   // callbacks
@@ -31,16 +29,13 @@ export const BottomSheetProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const open = (type: bottomSheetTypes) => {
     switch (type) {
       case 'result':
-        bottomSheetRef.current?.snapToIndex(1);
+        bottomSheetRef.current?.expand();
         break;
       case 'courseOrder':
-        courseOrderBottomSheetRef.current?.snapToIndex(1);
+        courseOrderBottomSheetRef.current?.expand();
         break;
       case 'gradeSettings':
-        gradeSettingsBottomSheetRef.current?.snapToIndex(1);
-        break;
-      case 'courseActions':
-        courseActionsBottomSheetRef.current?.snapToIndex(1);
+        gradeSettingsBottomSheetRef.current?.expand();
         break;
       default:
         break;
@@ -57,9 +52,6 @@ export const BottomSheetProvider: React.FC<{ children: React.ReactNode }> = ({ c
       case 'gradeSettings':
         gradeSettingsBottomSheetRef.current?.close();
         break;
-      case 'courseActions':
-        courseActionsBottomSheetRef.current?.close();
-        break;
       default:
         break;
     }
@@ -75,7 +67,6 @@ export const BottomSheetProvider: React.FC<{ children: React.ReactNode }> = ({ c
         close,
         courseOrderBottomSheetRef,
         gradeSettingsBottomSheetRef,
-        courseActionsBottomSheetRef,
       }}
     >
       {children}

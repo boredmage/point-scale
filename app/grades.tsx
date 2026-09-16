@@ -1,85 +1,96 @@
 import PageHeader from '@/components/page-header';
+import PrimaryButton from '@/components/primary-button';
 import Text from '@/components/text';
+import { hapticSelect } from '@/lib/haptics';
+import { toast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 import { GradeScale, useUserStore } from '@/store/user-store';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const scales: { value: GradeScale; label: string; description: string }[] = [
-  { value: '4.0', label: '4.0 Scale', description: 'Common in most universities' },
-  { value: '5.0', label: '5.0 Scale', description: 'Used in some institutions' },
+  { value: '4.0', label: '4.0 scale', description: 'Common in most universities' },
+  { value: '5.0', label: '5.0 scale', description: 'Used in some institutions' },
 ];
 
 const Grades = () => {
   const { gradeScale, setGradeScale } = useUserStore();
   const [selectedScale, setSelectedScale] = useState<GradeScale>(gradeScale);
+  const insets = useSafeAreaInsets();
 
   const hasChanges = selectedScale !== gradeScale;
 
-  const handleSave = () => {
-    setGradeScale(selectedScale);
-  };
-
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <PageHeader title="Grade Scale" description="Choose the grading scale for your institution" />
-      <View className="mx-auto w-11/12 flex-1 gap-6 py-4">
+    <View
+      className="flex-1 bg-surface"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 16 }}
+    >
+      <PageHeader title="Grade scale" description="Choose the scale your institution uses" />
+      <View className="flex-1 gap-4 px-5 pt-6">
         <View className="gap-3">
           {scales.map((scale) => {
             const isSelected = selectedScale === scale.value;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={scale.value}
-                className={`flex-row items-center gap-4 rounded-xl border-2 p-4 ${
-                  isSelected ? 'border-primary bg-primary/5' : 'border-gray-200 bg-white'
-                }`}
-                onPress={() => setSelectedScale(scale.value)}
-                activeOpacity={0.7}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected }}
+                className={cn(
+                  'flex-row items-center gap-4 rounded-2xl border-2 bg-white p-4',
+                  isSelected ? 'border-primary bg-primary-soft/60' : 'border-white',
+                )}
+                onPress={() => {
+                  if (scale.value !== selectedScale) hapticSelect();
+                  setSelectedScale(scale.value);
+                }}
               >
                 <View
-                  className={`h-6 w-6 items-center justify-center rounded-full border-2 ${
-                    isSelected ? 'border-primary' : 'border-gray-300'
-                  }`}
+                  className={cn(
+                    'h-6 w-6 items-center justify-center rounded-full border-2',
+                    isSelected ? 'border-primary' : 'border-[#C4C6D4]',
+                  )}
                 >
-                  {isSelected && <View className="h-3 w-3 rounded-full bg-primary" />}
+                  {isSelected ? <View className="h-3 w-3 rounded-full bg-primary" /> : null}
                 </View>
                 <View className="flex-1">
-                  <Text className={`text-lg ${isSelected ? 'text-primary' : 'text-gray-900'}`}>
-                    {scale.label}
-                  </Text>
-                  <Text className="text-sm text-gray-500">{scale.description}</Text>
+                  <Text className="text-base text-ink">{scale.label}</Text>
+                  <Text className="text-[13px] text-muted">{scale.description}</Text>
                 </View>
-                <Text className={`text-3xl ${isSelected ? 'text-primary' : 'text-gray-300'}`}>
+                <Text
+                  className={cn(
+                    'text-2xl font-medium',
+                    isSelected ? 'text-primary' : 'text-[#C4C6D4]',
+                  )}
+                >
                   {scale.value}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
 
-        <View className="flex-row items-start justify-center gap-4 rounded-xl bg-[#f3f4f6] px-6 py-4">
-          <Feather name="info" size={20} color="#6b7280" className="top-1" />
-          <Text className="flex-1 text-base text-gray-500">
-            Changing the grade scale will affect how your GPA is calculated across all semesters.
+        <View className="flex-row items-start gap-3 rounded-2xl bg-white p-4">
+          <Feather name="info" size={18} color="#6B6E85" style={{ marginTop: 2 }} />
+          <Text className="flex-1 text-sm text-muted">
+            Changing the grade scale affects how your GPA is calculated across all semesters.
           </Text>
         </View>
 
         <View className="flex-1" />
 
-        <TouchableOpacity
-          className={`flex-row items-center justify-center gap-3 rounded-xl p-4 ${
-            hasChanges ? 'bg-primary' : 'bg-gray-300'
-          }`}
-          onPress={handleSave}
-          activeOpacity={0.8}
+        <PrimaryButton
+          title="Save"
+          icon={<Feather name="check" size={18} color="#fff" />}
+          onPress={() => {
+            setGradeScale(selectedScale);
+            toast('Grade Scale Updated', `Now using the ${selectedScale} scale`);
+          }}
           disabled={!hasChanges}
-        >
-          <Feather name="check" size={22} color="white" />
-          <Text className="text-lg text-white">Save</Text>
-        </TouchableOpacity>
+        />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

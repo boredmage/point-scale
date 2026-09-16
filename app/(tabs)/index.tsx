@@ -2,6 +2,7 @@ import ResultList from '@/components/result-list';
 import SessionTabs from '@/components/session-tabs';
 import Text from '@/components/text';
 import { calculateCGPA } from '@/constants/utils';
+import { cn } from '@/lib/utils';
 import { useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
 import { useUserStore } from '@/store/user-store';
@@ -9,7 +10,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
 export default function HomeScreen() {
   const { getCourses, courses: default_list } = useCourseStore((store) => store);
@@ -44,29 +44,20 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
       <View className="gap-5 pt-4">
-        <View className="flex-row items-center justify-between px-5">
-          <Text className="text-[15px] text-muted">Point Scale</Text>
-          <View className="h-9 flex-row items-center gap-1.5 rounded-lg border border-line bg-white px-3.5">
-            <ScaleIcon />
-            <Text className="text-sm text-muted">{gradeScale} scale</Text>
-          </View>
-        </View>
-
-        <View className="mx-5 flex-row items-center gap-4 rounded-2xl bg-primary px-4 py-3.5">
-          <View className="gap-0.5">
-            <Text className="text-xs text-white/70">Current CGPA</Text>
-            <View className="flex-row items-baseline gap-1">
-              <Text className="text-[34px] font-medium leading-10 text-white">
+        <View className="mx-5 flex-row items-center gap-5 rounded-2xl bg-primary px-5 py-[18px]">
+          <View className="flex-1 justify-center gap-0.5">
+            <Text className="text-[13px] text-white/70">Current CGPA</Text>
+            <View className="flex-row items-baseline gap-1.5">
+              <Text className="text-[48px] font-medium leading-[52px] tracking-tight text-white">
                 {totalCGPA.toFixed(2)}
               </Text>
-              <Text className="text-xs text-white/70">/ {gradeScale}</Text>
+              <Text className="text-sm text-white/70">/ {gradeScale}</Text>
             </View>
           </View>
-          <View className="h-9 w-px bg-white/25" />
-          <View className="flex-1 flex-row">
+          <View className="min-w-[132px] gap-1.5">
             <Stat title="Units reg." value={totalUnits} />
             <Stat title="Passed" value={unitsPassed} />
-            <Stat title="WGP" value={totalWGPA} />
+            <Stat title="WGP" value={totalWGPA} isLast />
           </View>
         </View>
 
@@ -93,21 +84,22 @@ export default function HomeScreen() {
   );
 }
 
-const Stat = ({ title, value }: { title: string; value: number }) => (
-  <View className="flex-1 items-center">
-    <Text className="text-lg font-medium text-white">{value}</Text>
-    <Text className="text-[11px] text-white/70">{title}</Text>
+const Stat = ({
+  title,
+  value,
+  isLast = false,
+}: {
+  title: string;
+  value: number;
+  isLast?: boolean;
+}) => (
+  <View
+    className={cn(
+      'flex-row items-baseline justify-between',
+      !isLast && 'border-b border-white/15 pb-1.5',
+    )}
+  >
+    <Text className="text-[13px] text-white/70">{title}</Text>
+    <Text className="text-base font-medium text-white">{value}</Text>
   </View>
-);
-
-const ScaleIcon = () => (
-  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-    <Path
-      d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"
-      stroke="#5271FF"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
 );

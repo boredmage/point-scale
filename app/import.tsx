@@ -26,12 +26,13 @@ const Import = () => {
   const addCourse = useCourseStore((state) => state.addCourse);
   const { addSemester, setActiveSemesterId } = useSemesterStore((state) => state);
 
+  // Only the academic data is replaced by an import. The user store (onboarding
+  // flag, grade scale) must survive.
   const clearStorage = async () => {
     try {
-      await AsyncStorage.clear();
-      // console.log('AsyncStorage cleared!');
+      await AsyncStorage.multiRemove(['point-scale-semesters-store', 'point-scale-courses-store']);
     } catch (error) {
-      console.error('Error clearing AsyncStorage:', error);
+      console.error('Error clearing stored results:', error);
     }
   };
 
@@ -73,13 +74,13 @@ const Import = () => {
 
   return (
     <View
-      className="flex-1 bg-white"
+      className="flex-1 bg-surface"
       style={{ paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}
     >
       <PageHeader title="Results Import" description="Import your results" />
       <View className="mt-40 flex-1 flex-col items-center gap-8">
         <CircleDashedCheck width={140} height={140} strokeWidth={1} stroke="#5271FF" />
-        <Text className="text-3xl uppercase text-[#5271FF]">Import Successful</Text>
+        <Text className="text-2xl font-medium text-ink">Import successful</Text>
       </View>
     </View>
   );

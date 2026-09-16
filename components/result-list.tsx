@@ -1,11 +1,11 @@
 import { calculateCGPA, getGrade } from '@/constants/utils';
 import { useBottomSheetContext } from '@/context/bottom-sheet-context';
+import { hapticTap } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { CourseType, useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
 import { useUserStore } from '@/store/user-store';
 import { AntDesign } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { default as React, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
@@ -39,22 +39,15 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
     const { open, setActiveResultId } = useBottomSheetContext();
 
     const openBottomSheet = () => {
+      hapticTap();
       setActiveResultId(item.id);
       open('result');
-    };
-
-    const openActions = () => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setActiveResultId(item.id);
-      open('courseActions');
     };
 
     return (
       <Pressable
         onPress={openBottomSheet}
-        onLongPress={openActions}
-        delayLongPress={350}
-        accessibilityHint="Long press for edit and delete options"
+        accessibilityRole="button"
         className={cn(
           'flex-row items-center gap-3.5 rounded-2xl bg-white px-4 py-3.5',
           'active:bg-surface',

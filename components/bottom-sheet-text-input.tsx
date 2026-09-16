@@ -1,29 +1,19 @@
 import { cn } from '@/lib/utils';
 import { BottomSheetTextInput as TextInput } from '@gorhom/bottom-sheet';
 import React from 'react';
-import { Platform } from 'react-native';
 
-const BottomSheetTextInput = (props: React.ComponentProps<typeof TextInput>) => {
+const BottomSheetTextInput = ({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<typeof TextInput>) => {
   return (
     <TextInput
+      placeholderTextColor="#9A9DB3"
       {...props}
-      style={[
-        props.style,
-        {
-          height: Platform.select({
-            ios: 45,
-            android: 50,
-            default: 50,
-          }),
-          fontSize: 16,
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          lineHeight: 20,
-          // backgroundColor: 'rgba(220, 220, 220, 0.775)',
-        },
-      ]}
-      className={cn(props.className, 'rounded-xl border border-gray-300 font-system')}
-    ></TextInput>
+      style={[{ height: 48, fontSize: 16, paddingHorizontal: 14, lineHeight: 20 }, style]}
+      className={cn('rounded-lg border border-line bg-white font-system text-ink', className)}
+    />
   );
 };
 

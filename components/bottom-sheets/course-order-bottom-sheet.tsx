@@ -1,96 +1,89 @@
 import { useBottomSheetContext } from '@/context/bottom-sheet-context';
+import { hapticSelect } from '@/lib/haptics';
+import { toast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
 import { CoursesOrder, useCourseStore } from '@/store/courses-store';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useState } from 'react';
-import { Pressable, TouchableOpacity, View } from 'react-native';
-import { CircleCheck } from '../icons';
+import { Pressable, View } from 'react-native';
+import PrimaryButton from '../primary-button';
+import { Sheet, SheetHeader } from '../sheet';
 import Text from '../text';
+
+const options: { value: CoursesOrder; title: string; description: string }[] = [
+  { value: 'result', title: 'Result', description: 'Ordered by your results or grades.' },
+  { value: 'course_units', title: 'Course units', description: 'Ordered by the number of units.' },
+  { value: 'course_code', title: 'Course code', description: 'Ordered alphabetically by code.' },
+  { value: 'default', title: 'As added', description: 'Ordered by the sequence you added them.' },
+];
 
 const CourseOrderBottomSheet = () => {
   const { courseOrderBottomSheetRef, close } = useBottomSheetContext();
   const { courseOrder, setCourseOrder } = useCourseStore((store) => store);
-
   const [selectedOrder, setSelectedOrder] = useState<CoursesOrder>(courseOrder);
-
-  const handleOrderSelect = (order: CoursesOrder) => {
-    setSelectedOrder(order);
-  };
 
   const handleSave = () => {
     setCourseOrder(selectedOrder);
     close('courseOrder');
+    toast('Order Updated', 'Your courses have been reordered');
   };
 
   return (
-    <BottomSheet
-      ref={courseOrderBottomSheetRef}
-      snapPoints={[1]}
-      index={-1}
-      enablePanDownToClose
-      backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
-    >
-      <BottomSheetView className="relative gap-5 px-5 pb-12 pt-4">
-        <View>
-          <Text className="text-2xl">Course Order</Text>
-          <Text className="text-[#BEC3C9]">Select the order of your courses.</Text>
+    <Sheet ref={courseOrderBottomSheetRef}>
+      <BottomSheetView className="gap-5 px-5 pb-12 pt-2">
+        <SheetHeader title="Course order" description="Choose how courses are listed." />
+        <View className="gap-2.5">
+          {options.map((option) => (
+            <Option
+              key={option.value}
+              {...option}
+              selected={selectedOrder === option.value}
+              onPress={() => {
+                if (option.value !== selectedOrder) hapticSelect();
+                setSelectedOrder(option.value);
+              }}
+            />
+          ))}
         </View>
-        <View className="relative gap-4">
-          <Selector
-            title="Result"
-            description="Ordered by your results or grades."
-            selected={selectedOrder === 'result'}
-            onPress={() => handleOrderSelect('result')}
-          />
-          <Selector
-            title="Course Units"
-            description="Ordered by the number of units they have."
-            selected={selectedOrder === 'course_units'}
-            onPress={() => handleOrderSelect('course_units')}
-          />
-          <Selector
-            title="Course Code"
-            description="Ordered alphabetically by their course code."
-            selected={selectedOrder === 'course_code'}
-            onPress={() => handleOrderSelect('course_code')}
-          />
-          <Selector
-            title="Default"
-            description="Ordered by the sequence in which you added them."
-            selected={selectedOrder === 'default'}
-            onPress={() => handleOrderSelect('default')}
-          />
-        </View>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => handleSave()}
-          disabled={courseOrder === selectedOrder}
-          className="mt-6 rounded-lg bg-primary py-3 disabled:opacity-50"
-        >
-          <Text className="text-center text-lg text-white">Save</Text>
-        </TouchableOpacity>
+        <PrimaryButton title="Save" onPress={handleSave} disabled={courseOrder === selectedOrder} />
       </BottomSheetView>
-    </BottomSheet>
+    </Sheet>
   );
 };
 
-interface SelectorProps extends React.ComponentProps<typeof Pressable> {
-  selected?: boolean;
+const Option = ({
+  title,
+  description,
+  selected,
+  onPress,
+}: {
   title: string;
   description: string;
-}
-
-const Selector = ({ selected = false, title, description, onPress }: SelectorProps) => {
-  return (
-    <Pressable onPress={onPress}>
-      <View className="flex-row items-center gap-3">
-        <CircleCheck width={28} height={28} fill={selected ? '#5271FF' : '#BEC3C9'} />
-        <View className="">
-          <Text className="text-lg">{title}</Text>
-          <Text className="-mt-1 text-sm text-[#BEC3C9]">{description}</Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-};
+  selected: boolean;
+  onPress: () => void;
+}) => (
+  <Pressable
+    onPress={onPress}
+    accessibilityRole="radio"
+    accessibilityState={{ selected }}
+    className={cn(
+      'flex-row items-center gap-3.5 rounded-xl border-2 bg-surface p-3.5',
+      selected ? 'border-primary bg-primary-soft/60' : 'border-surface',
+    )}
+  >
+    <View
+      className={cn(
+        'h-6 w-6 items-center justify-center rounded-full border-2',
+        selected ? 'border-primary' : 'border-[#C4C6D4]',
+      )}
+    >
+      {selected ? <View className="h-3 w-3 rounded-full bg-primary" /> : null}
+    </View>
+    <View className="flex-1">
+      <Text className="text-base text-ink">{title}</Text>
+      <Text className="text-[13px] text-muted">{description}</Text>
+    </View>
+  </Pressable>
+);
 
 export default CourseOrderBottomSheet;

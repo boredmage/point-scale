@@ -1,5 +1,6 @@
 import { Adjustments, ChartLine, Target } from '@/components/icons';
 import Text from '@/components/text';
+import { hapticTap } from '@/lib/haptics';
 import { useUserStore } from '@/store/user-store';
 import { useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -40,10 +41,11 @@ const Onboarding = () => {
   }, []);
 
   const router = useRouter();
-  const toggleHasOnboarded = useUserStore((state) => state.toggleHasOnboarded);
+  const finishOnboarding = useUserStore((state) => state.finishOnboarding);
 
   const handlePress = () => {
-    toggleHasOnboarded();
+    hapticTap();
+    finishOnboarding();
     router.replace('/');
   };
 
