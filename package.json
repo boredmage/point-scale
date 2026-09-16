@@ -15,7 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
-    "@expo-google-fonts/atkinson-hyperlegible": "^0.2.3",
+    "@expo-google-fonts/google-sans": "^0.4.2",
     "@expo/metro-runtime": "6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.8",

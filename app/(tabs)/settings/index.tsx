@@ -1,63 +1,108 @@
 import {
   Badges,
   Category,
-  ComingSoon,
   MessageReport,
+  Point,
   RoudedArrowDown,
   SortAscendingShapes,
 } from '@/components/icons';
-import PageHeader from '@/components/page-header';
 import Text from '@/components/text';
 import { useBottomSheetContext } from '@/context/bottom-sheet-context';
-import { Link } from 'expo-router';
+import { cn } from '@/lib/utils';
+import { CoursesOrder, useCourseStore } from '@/store/courses-store';
+import { useUserStore } from '@/store/user-store';
+import { Feather } from '@expo/vector-icons';
+import Constants from 'expo-constants';
+import { Href, Link } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { forwardRef } from 'react';
-import { Pressable, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg from 'react-native-svg';
 
-interface PressableContentProps extends React.ComponentProps<typeof Pressable> {
+const orderLabels: Record<CoursesOrder, string> = {
+  result: 'By result',
+  course_units: 'By course units',
+  course_code: 'By course code',
+  default: 'As added',
+};
+
+interface RowProps extends React.ComponentProps<typeof Pressable> {
   title: string;
   description: string;
-  comingSoon?: boolean;
   icon: React.FC<React.ComponentProps<typeof Svg>>;
+  trailing?: 'chevron' | 'external' | 'soon';
+  isLast?: boolean;
 }
 
-interface NavLinkProps extends PressableContentProps {
-  href?: string;
+interface NavRowProps extends RowProps {
+  href: Href;
 }
 
-const PressableContent = forwardRef(
-  ({ title, description, icon, onPress, comingSoon }: PressableContentProps, _) => {
+const Row = forwardRef<View, RowProps>(
+  ({ title, description, icon: Icon, onPress, trailing = 'chevron', isLast = false }, ref) => {
+    const disabled = trailing === 'soon';
     return (
-      <Pressable className="flex-row items-center justify-between px-4" onPress={onPress}>
-        <View className="flex-row items-center">
-          {icon({
-            fill: '#bec3c9',
-            width: 32,
-            height: 32,
-          })}
-          <View className="px-4 leading-3">
-            <Text className="text-xl">{title}</Text>
-            <Text className="text-sm leading-4 text-[#bec3c9]">{description}</Text>
+      <Pressable
+        ref={ref}
+        onPress={onPress}
+        disabled={disabled}
+        className="active:bg-surface"
+        accessibilityRole="button"
+      >
+        <View className="min-h-16 flex-row items-center gap-3.5 px-4 py-3.5">
+          <View
+            className={cn(
+              'h-10 w-10 items-center justify-center rounded-xl',
+              disabled ? 'bg-[#F1F2F7]' : 'bg-primary-soft',
+            )}
+          >
+            <Icon fill={disabled ? '#9A9DB3' : '#5271FF'} width={22} height={22} />
           </View>
+          <View className="flex-1 gap-px">
+            <Text className={cn('text-base', disabled ? 'text-faint' : 'text-ink')}>{title}</Text>
+            <Text className={cn('text-[13px]', disabled ? 'text-[#B6B8C8]' : 'text-muted')}>
+              {description}
+            </Text>
+          </View>
+          {trailing === 'soon' ? (
+            <View className="rounded-full bg-[#F1F2F7] px-2.5 py-1">
+              <Text className="text-[11px] font-medium tracking-wide text-muted">SOON</Text>
+            </View>
+          ) : (
+            <Feather
+              name={trailing === 'external' ? 'arrow-up-right' : 'chevron-right'}
+              size={18}
+              color="#C4C6D4"
+            />
+          )}
         </View>
-        {comingSoon ? <ComingSoon /> : null}
+        {!isLast ? <View className="ml-[70px] h-px bg-[#EEEFF5]" /> : null}
       </Pressable>
     );
   },
 );
+Row.displayName = 'SettingsRow';
 
-const NavLink = ({ href = '/settings', ...props }: NavLinkProps) => {
-  return (
-    <Link href={href} asChild>
-      <PressableContent {...props} />
-    </Link>
-  );
-};
+const NavRow = ({ href, ...props }: NavRowProps) => (
+  <Link href={href} asChild>
+    <Row {...props} />
+  </Link>
+);
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <View className="gap-2.5">
+    <Text className="pl-1 text-xs font-medium uppercase tracking-widest text-faint">{title}</Text>
+    <View className="overflow-hidden rounded-[18px] bg-white">{children}</View>
+  </View>
+);
 
 const Settings = () => {
   const { open } = useBottomSheetContext();
+  const { gradeScale } = useUserStore();
+  const courseOrder = useCourseStore((store) => store.courseOrder);
+  const insets = useSafeAreaInsets();
+  const version = Constants.expoConfig?.version ?? '';
 
   const openWebBrowser = async (url: string) => {
     try {
@@ -68,37 +113,65 @@ const Settings = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 gap-8 bg-white">
-      <PageHeader title="Settings" description="Manage your app settings" showBackButton={false} />
-      <NavLink
-        title="Semesters"
-        description="Manage your semesters"
-        icon={Category}
-        href="/manage-semesters"
-      />
-      <NavLink title="Grades" description="Manage your grades" icon={Badges} href="/grades" />
-      <PressableContent
-        onPress={() => {
-          open('courseOrder');
-        }}
-        icon={SortAscendingShapes}
-        title="Courses Order"
-        description="Manage your courses order"
-      />
-      <PressableContent
-        onPress={() => {}}
-        icon={RoudedArrowDown}
-        title="Download Results"
-        description="Download and share your results"
-        comingSoon
-      />
-      <PressableContent
-        icon={MessageReport}
-        title="Feedback"
-        description="Send us your feedback"
-        onPress={() => openWebBrowser('https://www.qudusayo.pro/contact-me')}
-      />
-    </SafeAreaView>
+    <ScrollView
+      className="flex-1 bg-surface"
+      contentContainerClassName="gap-6 px-5 pb-32"
+      // iOS native tabs inset the first ScrollView for the status bar themselves.
+      contentContainerStyle={{ paddingTop: Platform.OS === 'ios' ? 16 : insets.top + 16 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="gap-1">
+        <Text className="text-3xl font-medium text-ink">Settings</Text>
+        <Text className="text-sm text-muted">Manage your app settings</Text>
+      </View>
+
+      <Section title="Academic">
+        <NavRow
+          title="Semesters"
+          description="Manage your semesters"
+          icon={Category}
+          href="/manage-semesters"
+        />
+        <NavRow
+          title="Grade scale"
+          description={`${gradeScale} scale`}
+          icon={Badges}
+          href="/grades"
+        />
+        <Row
+          title="Course order"
+          description={orderLabels[courseOrder]}
+          icon={SortAscendingShapes}
+          onPress={() => open('courseOrder')}
+          isLast
+        />
+      </Section>
+
+      <Section title="More">
+        <Row
+          title="Download results"
+          description="Download and share your results"
+          icon={RoudedArrowDown}
+          trailing="soon"
+        />
+        <Row
+          title="Feedback"
+          description="Send us your feedback"
+          icon={MessageReport}
+          trailing="external"
+          onPress={() => openWebBrowser('https://www.qudusayo.pro/contact-me')}
+          isLast
+        />
+      </Section>
+
+      {version ? (
+        <View className="flex-row items-center justify-center">
+          <Text className="text-xs text-[#B6B8C8]">Point Scale</Text>
+          <Point width={10} height={10} fill="#D2D4DF" style={{ marginHorizontal: 6 }} />
+          <Text className="text-xs text-[#B6B8C8]">Version {version}</Text>
+        </View>
+      ) : null}
+    </ScrollView>
   );
 };
 

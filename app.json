@@ -44,8 +44,8 @@
         "expo-font",
         {
           "fonts": [
-            "node_modules/@expo-google-fonts/atkinson-hyperlegible/AtkinsonHyperlegible_400Regular.ttf",
-            "node_modules/@expo-google-fonts/atkinson-hyperlegible/AtkinsonHyperlegible_700Bold.ttf"
+            "node_modules/@expo-google-fonts/google-sans/400Regular/GoogleSans_400Regular.ttf",
+            "node_modules/@expo-google-fonts/google-sans/500Medium/GoogleSans_500Medium.ttf"
           ]
         }
       ],

@@ -8,7 +8,8 @@ import { useUserStore } from '@/store/user-store';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 export default function HomeScreen() {
   const { getCourses, courses: default_list } = useCourseStore((store) => store);
@@ -19,6 +20,7 @@ export default function HomeScreen() {
   const [unitsPassed, setUnitsPassed] = useState(0);
   const { semesters, activeSemesterId, setActiveSemesterId } = useSemesterStore((store) => store);
   const { gradeScale } = useUserStore();
+  const insets = useSafeAreaInsets();
 
   const calculateTotalCGPA = () => {
     const cgpa = calculateCGPA(courses, gradeScale);
@@ -40,49 +42,72 @@ export default function HomeScreen() {
   }, [activeSemesterId, default_list, gradeScale]);
 
   return (
-    <View className="flex-1">
-      <View className="flex-1 bg-[#f3f4f6]">
-        <View className="bg-white">
-          <SafeAreaView className="mx-auto w-11/12 gap-8 py-8" edges={['top', 'left', 'right']}>
-            <View className="items-center gap-2">
-              <Text>Current CGPA</Text>
-              <Text className="text-7xl font-normal text-primary">{totalCGPA.toFixed(2)}</Text>
-            </View>
-            <View className="flex-row gap-4">
-              <DetailsCard title="Units Reg." value={totalUnits + ''} />
-              <DetailsCard title="Units Passed" value={unitsPassed + ''} />
-              <DetailsCard title="Total WGP" value={totalWGPA + ''} />
-            </View>
-
-            <SessionTabs
-              semesters={semesters}
-              activeSemesterId={activeSemesterId}
-              setActiveSemesterId={setActiveSemesterId}
-            />
-          </SafeAreaView>
+    <View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
+      <View className="gap-5 pt-4">
+        <View className="flex-row items-center justify-between px-5">
+          <Text className="text-[15px] text-muted">Point Scale</Text>
+          <View className="h-9 flex-row items-center gap-1.5 rounded-lg border border-line bg-white px-3.5">
+            <ScaleIcon />
+            <Text className="text-sm text-muted">{gradeScale} scale</Text>
+          </View>
         </View>
-        {semesters.length ? (
-          <View className="mx-auto w-11/12 flex-1 gap-4">
-            <ResultList activeSemesterId={activeSemesterId} />
+
+        <View className="mx-5 flex-row items-center gap-4 rounded-2xl bg-primary px-4 py-3.5">
+          <View className="gap-0.5">
+            <Text className="text-xs text-white/70">Current CGPA</Text>
+            <View className="flex-row items-baseline gap-1">
+              <Text className="text-[34px] font-medium leading-10 text-white">
+                {totalCGPA.toFixed(2)}
+              </Text>
+              <Text className="text-xs text-white/70">/ {gradeScale}</Text>
+            </View>
           </View>
-        ) : (
-          <View className="mt-12 flex-1 self-center justify-self-center">
-            <Text className="text-center text-xl text-black">No semesters added yet</Text>
-            <Text className="text-center text-sm text-[#606067]">
-              Tap the + button above to add a semester
-            </Text>
+          <View className="h-9 w-px bg-white/25" />
+          <View className="flex-1 flex-row">
+            <Stat title="Units reg." value={totalUnits} />
+            <Stat title="Passed" value={unitsPassed} />
+            <Stat title="WGP" value={totalWGPA} />
           </View>
-        )}
+        </View>
+
+        <SessionTabs
+          semesters={semesters}
+          activeSemesterId={activeSemesterId}
+          setActiveSemesterId={setActiveSemesterId}
+        />
       </View>
+
+      {semesters.length ? (
+        <View className="flex-1 px-5">
+          <ResultList activeSemesterId={activeSemesterId} />
+        </View>
+      ) : (
+        <View className="mt-16 items-center gap-1 px-10">
+          <Text className="text-center text-xl text-ink">No semesters yet</Text>
+          <Text className="text-center text-sm text-muted">
+            Tap the + button above to add your first semester
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
 
-const DetailsCard = ({ title, value }: { title: string; value: string }) => {
-  return (
-    <View className="flex-1 items-center gap-1 rounded-lg bg-[#f3f4f6] p-4">
-      <Text className="font-system text-sm text-[#606067]">{title}</Text>
-      <Text className="font-system text-2xl font-normal text-primary">{value}</Text>
-    </View>
-  );
-};
+const Stat = ({ title, value }: { title: string; value: number }) => (
+  <View className="flex-1 items-center">
+    <Text className="text-lg font-medium text-white">{value}</Text>
+    <Text className="text-[11px] text-white/70">{title}</Text>
+  </View>
+);
+
+const ScaleIcon = () => (
+  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"
+      stroke="#5271FF"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);

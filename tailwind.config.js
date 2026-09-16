@@ -9,12 +9,23 @@ module.exports = {
     extend: {
       colors: {
         primary: '#5271FF',
+        'primary-soft': '#E8ECFF',
+        surface: '#F5F6FA',
+        ink: '#15172B',
+        muted: '#6B6E85',
+        faint: '#9A9DB3',
+        line: '#E4E6EF',
       },
       fontFamily: {
         system: platformSelect({
-          ios: 'AtkinsonHyperlegible-Regular',
-          android: 'AtkinsonHyperlegible_400Regular',
-          default: 'AtkinsonHyperlegible_400Regular',
+          ios: 'GoogleSans-Regular',
+          android: 'GoogleSans_400Regular',
+          default: 'GoogleSans_400Regular',
+        }),
+        'system-medium': platformSelect({
+          ios: 'GoogleSans-Medium',
+          android: 'GoogleSans_500Medium',
+          default: 'GoogleSans_500Medium',
         }),
       },
       animation: {

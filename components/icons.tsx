@@ -268,9 +268,8 @@ const ComingSoon = (props: React.ComponentProps<typeof Svg>) => (
       x={40}
       y={13}
       textAnchor="middle"
-      fontFamily="AtkinsonHyperlegible-Regular, AtkinsonHyperlegible_400Regular, sans-serif"
+      fontFamily="GoogleSans-Medium, GoogleSans_500Medium, sans-serif"
       fontSize={9}
-      fontWeight="bold"
       fill="#FFF"
     >
       COMING SOON
@@ -302,6 +301,13 @@ const ArrowNarrowLeft = (props: React.ComponentProps<typeof Svg>) => (
   </Svg>
 );
 
+const Point = (props: React.ComponentProps<typeof Svg>) => (
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <Path d="M0 0h24v24H0z" fill="none" />
+    <Path d="M12 7a5 5 0 1 1-4.995 5.217l-.005-.217.005-.217A5 5 0 0 1 12 7" />
+  </Svg>
+);
+
 export {
   Adjustments,
   ArrowNarrowLeft,
@@ -321,6 +327,7 @@ export {
   Home,
   MessageReport,
   Pencil,
+  Point,
   RotateClockwise2,
   RoudedArrowDown,
   Settings,

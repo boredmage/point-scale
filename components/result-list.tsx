@@ -4,12 +4,13 @@ import { cn } from '@/lib/utils';
 import { CourseType, useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
 import { useUserStore } from '@/store/user-store';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { default as React, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
-import { GetGradeIcon } from './getGradeIcon';
+import GradeTile from './grade-tile';
+import { Point } from './icons';
 import Text from './text';
 
 const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) => {
@@ -55,25 +56,23 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
         delayLongPress={350}
         accessibilityHint="Long press for edit and delete options"
         className={cn(
-          'box-border flex-row justify-between rounded-lg border border-[#c5c5c5] bg-white p-4',
-          'active:bg-[#f3f4f6]',
+          'flex-row items-center gap-3.5 rounded-2xl bg-white px-4 py-3.5',
+          'active:bg-surface',
         )}
       >
-        <View className="flex-1">
-          <View className="w-11/12 flex-row items-center gap-2">
-            <Text className="text-lg" numberOfLines={1}>
-              {course_title}
-            </Text>
-          </View>
+        <View className="flex-1 gap-0.5">
+          <Text className="text-lg text-ink" numberOfLines={1}>
+            {course_title}
+          </Text>
           <View className="flex-row items-center">
-            <Text className="text-[#606067]">{course_code}</Text>
-            <Entypo name="dot-single" size={24} color="#606067" />
-            <Text className="text-[#606067]">
-              {course_units} Unit{course_units && course_units > 1 ? 's' : ''}
+            <Text className="text-sm text-muted">{course_code}</Text>
+            <Point width={10} height={10} fill="#C4C6D4" style={{ marginHorizontal: 6 }} />
+            <Text className="text-sm text-muted">
+              {course_units} unit{course_units && course_units > 1 ? 's' : ''}
             </Text>
           </View>
         </View>
-        <GetGradeIcon grade={getGrade(result || 0, gradeScale)} />
+        <GradeTile grade={getGrade(result || 0, gradeScale)} />
       </Pressable>
     );
   };
@@ -81,15 +80,17 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
   return (
     <FlatList
       data={results}
-      ListHeaderComponentClassName="pt-4"
+      ListHeaderComponentClassName="pb-1 pt-6"
       ListHeaderComponent={
-        <View className="flex-row justify-between">
-          <View>
-            <View className="flex-row items-center gap-2">
-              <Text className="text-lg">{semesterName}</Text>
-            </View>
+        <View className="flex-row items-end justify-between">
+          <View className="gap-0.5">
+            <Text className="text-lg font-medium text-ink">{semesterName}</Text>
             <View className="flex-row items-center">
-              <Text className="text-[#606067]">Current CGPA: {cgpa}</Text>
+              <Text className="text-[13px] text-muted">
+                {results.length} course{results.length === 1 ? '' : 's'}
+              </Text>
+              <Point width={10} height={10} fill="#C4C6D4" style={{ marginHorizontal: 6 }} />
+              <Text className="text-[13px] text-muted">GPA {cgpa}</Text>
             </View>
           </View>
           <Link
@@ -101,10 +102,10 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
           >
             <Pressable
               hitSlop={8}
-              className="flex-row items-center gap-2 rounded-lg bg-primary px-4 py-2"
+              className="h-11 flex-row items-center gap-2 rounded-lg bg-primary px-4"
             >
               <AntDesign name="plus" size={16} color="#fff" />
-              <Text className="font-system text-white">Add Course</Text>
+              <Text className="text-[15px] text-white">Add course</Text>
             </Pressable>
           </Link>
         </View>
@@ -113,13 +114,11 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
       keyExtractor={(item) => item.id}
       showsVerticalScrollIndicator={false}
       className="flex-1"
-      contentContainerClassName="gap-4 pb-28"
+      contentContainerClassName="gap-3 pb-32"
       ListEmptyComponent={
-        <View className="mt-12 flex-1 self-center justify-self-center">
-          <Text className="text-center text-xl text-black">No courses added yet</Text>
-          <Text className="text-center text-sm text-[#606067]">
-            Tap the button above to add a course
-          </Text>
+        <View className="mt-10 items-center gap-1">
+          <Text className="text-center text-xl text-ink">No courses yet</Text>
+          <Text className="text-center text-sm text-muted">Tap Add course to get started</Text>
         </View>
       }
     />
