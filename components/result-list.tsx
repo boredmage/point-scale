@@ -5,46 +5,12 @@ import { CourseType, useCourseStore } from '@/store/courses-store';
 import { useSemesterStore } from '@/store/semester-store';
 import { useUserStore } from '@/store/user-store';
 import { AntDesign, Entypo } from '@expo/vector-icons';
-import Feather from '@expo/vector-icons/Feather';
+import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
-import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, View } from 'react-native';
-import ReanimatedSwipeable, {
-  SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { default as React, useEffect, useMemo, useState } from 'react';
+import { FlatList, Pressable, View } from 'react-native';
 import { GetGradeIcon } from './getGradeIcon';
-import { Pencil } from './icons';
 import Text from './text';
-
-interface ActionProps extends React.ComponentProps<typeof Pressable> {
-  onPress: () => void;
-  semesterId: string;
-  courseId: string;
-}
-
-function RightAction({ semesterId, courseId, onPress }: ActionProps) {
-  return (
-    <View className="h-full w-2/5 flex-row">
-      <Link
-        href={{
-          pathname: '/manage-course/[semester-id]',
-          params: { 'semester-id': semesterId, 'course-id': courseId },
-        }}
-        asChild
-      >
-        <Pressable className="block h-full flex-1 items-center justify-center bg-[#5271FF]">
-          <Pencil stroke="#fff" />
-        </Pressable>
-      </Link>
-      <Pressable
-        className="block h-full flex-1 items-center justify-center rounded-lg rounded-l-none bg-[#DC3545]"
-        onPress={onPress}
-      >
-        <Feather name="trash-2" size={24} color="#fff" />
-      </Pressable>
-    </View>
-  );
-}
 
 const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) => {
   const [cgpa, setCgpa] = useState(0);
@@ -56,7 +22,6 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
   const results = courses.filter((course) => course.session_id === activeSemesterId);
   const semester = useSemesterStore((store) => store.semesters);
   const semesterDetails = semester.find((semester) => semester.id === activeSemesterId);
-  const openSwipeableRef = useRef<SwipeableMethods | null>(null);
   const { gradeScale } = useUserStore();
 
   const semesterName = semesterDetails
@@ -69,11 +34,7 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
   }, [results]);
 
   const ResultCard = ({ item }: { item: CourseType }) => {
-    const swipeableRef = useRef<SwipeableMethods | null>(null);
     const { course_title, course_code, course_units, result } = item;
-    const [swipedToLeft, setSwipedToLeft] = useState(false);
-    const [swipedToRight, setSwipedToRight] = useState(false);
-    const removeCourse = useCourseStore((store) => store.removeCourse);
     const { open, setActiveResultId } = useBottomSheetContext();
 
     const openBottomSheet = () => {
@@ -81,85 +42,39 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
       open('result');
     };
 
-    const handleDelete = () => {
-      Alert.alert(`Are you sure you want to delete ${course_code}?`, 'It will be gone for good', [
-        {
-          text: 'Yes',
-          onPress: () => {
-            removeCourse(item.id);
-          },
-          style: 'destructive',
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: () => swipeableRef.current?.close(),
-        },
-      ]);
+    const openActions = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setActiveResultId(item.id);
+      open('courseActions');
     };
 
-    const openHandlerCallback = useCallback((dir: 'left' | 'right') => {
-      setSwipedToLeft(dir === 'right');
-      setSwipedToRight(dir === 'left');
-
-      if (openSwipeableRef.current && openSwipeableRef.current !== swipeableRef.current) {
-        openSwipeableRef.current.close();
-      }
-      // Update the ref to the currently open swipeable
-      openSwipeableRef.current = swipeableRef.current;
-    }, []);
-
-    const closeHandlerCallback = useCallback(
-      (dir: 'left' | 'right') => {
-        setSwipedToLeft(dir === 'right' ? false : swipedToLeft);
-        setSwipedToRight(dir === 'left' ? false : swipedToRight);
-      },
-      [swipedToLeft, swipedToRight],
-    );
-
     return (
-      <ReanimatedSwipeable
-        ref={swipeableRef}
-        friction={2}
-        enableTrackpadTwoFingerGesture
-        rightThreshold={40}
-        renderRightActions={() => (
-          <RightAction onPress={handleDelete} courseId={item.id} semesterId={item.session_id} />
+      <Pressable
+        onPress={openBottomSheet}
+        onLongPress={openActions}
+        delayLongPress={350}
+        accessibilityHint="Long press for edit and delete options"
+        className={cn(
+          'box-border flex-row justify-between rounded-lg border border-[#c5c5c5] bg-white p-4',
+          'active:bg-[#f3f4f6]',
         )}
-        overshootFriction={0}
-        dragOffsetFromRightEdge={40}
-        overshootLeft={false}
-        overshootRight={false}
-        onSwipeableWillOpen={openHandlerCallback}
-        onSwipeableOpen={openHandlerCallback}
-        onSwipeableClose={closeHandlerCallback}
-        onSwipeableWillClose={closeHandlerCallback}
       >
-        <Pressable
-          onPress={openBottomSheet}
-          className={cn(
-            'box-border flex-row justify-between border border-[#c5c5c5] bg-white p-4',
-            swipedToLeft ? '!rounded-r-none border-r-0' : 'rounded-lg',
-            swipedToRight ? '!rounded-l-none border-l-0' : 'rounded-lg',
-          )}
-        >
-          <View className="flex-1">
-            <View className="w-11/12 flex-row items-center gap-2">
-              <Text className="text-lg" numberOfLines={1}>
-                {course_title}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className="text-[#606067]">{course_code}</Text>
-              <Entypo name="dot-single" size={24} color="#606067" />
-              <Text className="text-[#606067]">
-                {course_units} Unit{course_units && course_units > 1 ? 's' : ''}
-              </Text>
-            </View>
+        <View className="flex-1">
+          <View className="w-11/12 flex-row items-center gap-2">
+            <Text className="text-lg" numberOfLines={1}>
+              {course_title}
+            </Text>
           </View>
-          <GetGradeIcon grade={getGrade(result || 0, gradeScale)} />
-        </Pressable>
-      </ReanimatedSwipeable>
+          <View className="flex-row items-center">
+            <Text className="text-[#606067]">{course_code}</Text>
+            <Entypo name="dot-single" size={24} color="#606067" />
+            <Text className="text-[#606067]">
+              {course_units} Unit{course_units && course_units > 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
+        <GetGradeIcon grade={getGrade(result || 0, gradeScale)} />
+      </Pressable>
     );
   };
 
@@ -177,7 +92,13 @@ const ResultList = ({ activeSemesterId }: { activeSemesterId: string | null }) =
               <Text className="text-[#606067]">Current CGPA: {cgpa}</Text>
             </View>
           </View>
-          <Link href={{ pathname: '/manage-course/[semester-id]', params: { 'semester-id': activeSemesterId! } }} asChild>
+          <Link
+            href={{
+              pathname: '/manage-course/[semester-id]',
+              params: { 'semester-id': activeSemesterId! },
+            }}
+            asChild
+          >
             <Pressable
               hitSlop={8}
               className="flex-row items-center gap-2 rounded-lg bg-primary px-4 py-2"

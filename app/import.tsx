@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ResultType {
   id: string;
@@ -21,6 +21,7 @@ interface ResultType {
 
 const Import = () => {
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const encryptedData = params['result'] as string;
   const addCourse = useCourseStore((state) => state.addCourse);
   const { addSemester, setActiveSemesterId } = useSemesterStore((state) => state);
@@ -71,13 +72,16 @@ const Import = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View
+      className="flex-1 bg-white"
+      style={{ paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}
+    >
       <PageHeader title="Results Import" description="Import your results" />
       <View className="mt-40 flex-1 flex-col items-center gap-8">
         <CircleDashedCheck width={140} height={140} strokeWidth={1} stroke="#5271FF" />
         <Text className="text-3xl uppercase text-[#5271FF]">Import Successful</Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

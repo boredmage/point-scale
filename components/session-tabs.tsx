@@ -46,7 +46,7 @@ const SessionTabs = ({ semesters, activeSemesterId, setActiveSemesterId }: Sessi
         />
       )}
       contentContainerClassName="flex-row items-center gap-3"
-      ListFooterComponent={
+      ListHeaderComponent={
         <Link href="/add-semester" asChild>
           <Pressable hitSlop={8} className="rounded-lg bg-primary p-2">
             <AntDesign name="plus" size={24} color="#fff" />
