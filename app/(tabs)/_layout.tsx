@@ -10,7 +10,9 @@ import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import React from 'react';
 import { DynamicColorIOS, Platform } from 'react-native';
 
-const iosTint = DynamicColorIOS({ light: '#5271FF', dark: '#7B93FF' });
+// DynamicColorIOS throws when called on Android, so only build it on iOS.
+const iosTint =
+  Platform.OS === 'ios' ? DynamicColorIOS({ light: '#5271FF', dark: '#7B93FF' }) : '#5271FF';
 
 /** iOS: system tab bar. Renders as Liquid Glass on iOS 26+ and the classic bar on older versions. */
 function IOSTabs() {
@@ -37,6 +39,8 @@ function AndroidTabs() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         tabBarButton: HapticTab,
+        // Both tabs are light, so mount them up front instead of on first switch.
+        lazy: false,
         headerTitle: '',
         headerStyle: {
           shadowColor: 'transparent',

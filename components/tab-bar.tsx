@@ -15,7 +15,7 @@ import { Home, Settings } from './icons';
 const PRIMARY = '#5271FF';
 const GREY = '#6c6d73';
 const BUBBLE_INSET = 6;
-const SPRING = { damping: 18, stiffness: 180, mass: 0.8 };
+const SPRING = { damping: 28, stiffness: 520, mass: 0.5, overshootClamping: false };
 
 const icons = {
   index: Home,
@@ -41,7 +41,7 @@ const TabItem = ({
   accessibilityLabel,
   testID,
 }: TabItemProps) => {
-  const progress = useDerivedValue(() => withTiming(isFocused ? 1 : 0, { duration: 220 }));
+  const progress = useDerivedValue(() => withTiming(isFocused ? 1 : 0, { duration: 140 }));
 
   const labelStyle = useAnimatedStyle(() => ({
     color: interpolateColor(progress.value, [0, 1], [GREY, '#ffffff']),
