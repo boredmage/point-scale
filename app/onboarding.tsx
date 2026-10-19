@@ -1,11 +1,12 @@
 import { Adjustments, ChartLine, Target } from '@/components/icons';
+import PrimaryButton from '@/components/primary-button';
 import Text from '@/components/text';
 import { hapticTap } from '@/lib/haptics';
 import { useUserStore } from '@/store/user-store';
 import { useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg from 'react-native-svg';
 
@@ -44,16 +45,21 @@ const Onboarding = () => {
   const finishOnboarding = useUserStore((state) => state.finishOnboarding);
 
   const handlePress = () => {
-    hapticTap();
+    // Update state and navigate first so a haptics failure can't block onboarding.
     finishOnboarding();
     router.replace('/');
+    hapticTap();
   };
 
   return (
-    <SafeAreaView className="android:py-8 flex-1 bg-white">
-      <View className="mx-auto w-10/12 flex-1 justify-between">
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Scrollable so large system font sizes can't push the button off screen. */}
+      <ScrollView
+        contentContainerClassName="mx-auto w-10/12 flex-grow justify-between gap-10 py-8"
+        showsVerticalScrollIndicator={false}
+      >
         <View>
-          <Text className="android:mt-28 my-16 text-center text-3xl">Welcome to Point Scale</Text>
+          <Text className="android:mt-20 my-16 text-center text-3xl">Welcome to Point Scale</Text>
 
           <View className="gap-10">
             <Details
@@ -74,10 +80,8 @@ const Onboarding = () => {
           </View>
         </View>
 
-        <TouchableOpacity className="rounded-xl bg-primary p-3.5" onPress={handlePress}>
-          <Text className="text-center text-lg text-white">Get Started</Text>
-        </TouchableOpacity>
-      </View>
+        <PrimaryButton title="Get Started" onPress={handlePress} className="h-14 rounded-xl" />
+      </ScrollView>
     </SafeAreaView>
   );
 };

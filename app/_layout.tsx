@@ -12,7 +12,6 @@ configureReanimatedLogger({
 });
 
 import AppToast from '@/components/app-toast';
-import GradeSettingsBottomSheet from '@/components/bottom-sheets/grade-settings-bottom-sheet';
 import { BottomSheetProvider } from '@/context/bottom-sheet-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -27,7 +26,7 @@ export const unstable_settings = {
 export default function RootLayout() {
   return (
     <BottomSheetProvider>
-      <GestureHandlerRootView className="flex-2">
+      <GestureHandlerRootView style={{ flex: 1 }}>
         {/* <ThemeProvider> */}
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -77,7 +76,6 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
         {/* </ThemeProvider> */}
-        <GradeSettingsBottomSheet />
         <AppToast />
       </GestureHandlerRootView>
     </BottomSheetProvider>

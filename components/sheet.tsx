@@ -26,8 +26,12 @@ export const Sheet = forwardRef<BottomSheet, BottomSheetProps>((props, ref) => {
       backgroundStyle={{ borderRadius: 24, backgroundColor: '#FFFFFF' }}
       handleIndicatorStyle={{ backgroundColor: '#D2D4DF', width: 40 }}
       backdropComponent={(backdropProps) => (
+        // Start touch-through: by default the closed, invisible backdrop mounts with
+        // pointerEvents "auto" and covers the whole screen until a reanimated
+        // reaction flips it, which can leave every screen unclickable on some devices.
         <BottomSheetBackdrop
           {...backdropProps}
+          enableTouchThrough
           disappearsOnIndex={-1}
           appearsOnIndex={0}
           opacity={0.45}
