@@ -156,7 +156,7 @@ const Settings = () => {
           description="Send us your feedback"
           icon={MessageReport}
           trailing="external"
-          onPress={() => openWebBrowser('https://www.qudusayo.pro/contact-me')}
+          onPress={() => openWebBrowser('https://www.qudusayo.me/contact-me')}
           isLast
         />
       </Section>
