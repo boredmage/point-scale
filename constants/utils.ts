@@ -92,7 +92,9 @@ export function calculateCGPA(results: CourseType[], scale: GradeScale = '4.0'):
 
   const scoreGP = totalGradePoint / totalUnits;
 
-  const cgpa = Math.round((scoreGP + Number.EPSILON) * 100) / 100;
+  // Truncate (never round up) to two decimals: 2.997 -> 2.99.
+  // The tiny offset guards against binary float error, e.g. 2.99 * 100 = 298.99999999999994.
+  const cgpa = Math.floor(scoreGP * 100 + 1e-9) / 100;
 
   return [totalUnits, totalUnitPassed, totalGradePoint, cgpa];
 }
